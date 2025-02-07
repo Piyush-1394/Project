@@ -1,0 +1,11 @@
+@"
+__pycache__/
+.env
+*.log
+*.sqlite3
+instance/
+.DS_Store
+*.pyc
+.vscode/
+.idea/
+"@ | Out-File -Encoding UTF8 .gitignore
