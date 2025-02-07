@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Todo App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Add a Todo</h2>
+    <form action="/" method="POST">
+        <input type="text" name="title" placeholder="Title" required>
+        <input type="text" name="desc" placeholder="Description" required>
+        <button type="submit">Add Todo</button>
+    </form>
+
+    <h2>Pending Todos</h2>
+    <div id="pending-todos">
+        {% for todo in pending_todos %}
+            <div data-sno="{{ todo.sno }}">
+                <input type="checkbox" class="toggle-checkbox" data-sno="{{ todo.sno }}">
+                {{ todo.title }} - {{ todo.desc }}
+                <a href="/delete/{{ todo.sno }}">Delete</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Done Todos</h2>
+    <div id="completed-todos">
+        {% for todo in completed_todos %}
+            <div data-sno="{{ todo.sno }}">
+                <input type="checkbox" class="toggle-checkbox" data-sno="{{ todo.sno }}" checked>
+                <s>{{ todo.title }} - {{ todo.desc }}</s>
+                <a href="/delete/{{ todo.sno }}">Delete</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        $(document).on('change', '.toggle-checkbox', function() {
+            const sno = $(this).data('sno');
+            const parentDiv = $(this).closest('div');
+
+            $.post(`/toggle/${sno}`, function(response) {
+                if (response.success) {
+                    if ($(parentDiv).parent().attr('id') === 'pending-todos') {
+                        $('#completed-todos').append(parentDiv);  // Move to completed
+                        $(parentDiv).find('s').remove();
+                        $(parentDiv).html('<input type="checkbox" class="toggle-checkbox" data-sno="' + sno + '" checked> <s>' + parentDiv.text().trim() + '</s> <a href="/delete/' + sno + '">Delete</a>');
+                    } else {
+                        $('#pending-todos').append(parentDiv);  // Move back to pending
+                        $(parentDiv).find('s').contents().unwrap();
+                        $(parentDiv).html('<input type="checkbox" class="toggle-checkbox" data-sno="' + sno + '"> ' + parentDiv.text().trim() + ' <a href="/delete/' + sno + '">Delete</a>');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
